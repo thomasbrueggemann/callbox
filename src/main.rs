@@ -1,5 +1,6 @@
 use std::env;
-use twilio::{Client, OutboundCall};
+
+use twilio_agnostic::{Client, OutboundMessage};
 
 #[macro_use]
 extern crate rocket;
@@ -11,21 +12,23 @@ async fn index() -> &'static str {
         &env::var("TWILIO_AUTH_TOKEN").unwrap(),
     );
 
-    let from = env::var("CALL_FROM").unwrap();
-    let to = env::var("CALL_TO").unwrap();
-    let callback_url = format!("{}/callback", env::var("BASE_URL").unwrap());
+    let from = env::var("MESSAGE_FROM").unwrap();
+    let to = env::var("MESSAGE_TO").unwrap();
+    let body = env::var("MESSAGE_BODY").unwrap();
 
     println!("Initiate call from {} to {}", &from, &to);
 
     client
-        .make_call(OutboundCall::new(&from, &to, &callback_url))
+        .send_message(OutboundMessage::new(&from, &to, &body))
         .await
         .unwrap();
 
-    "Call in progress..."
+    "Message sent..."
 }
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount("/", routes![index])
+#[rocket::main]
+async fn main() -> Result<(), rocket::Error> {
+    let _rocket = rocket::build().mount("/", routes![index]).launch().await?;
+
+    Ok(())
 }

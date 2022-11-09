@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 rocket = "0.5.0-rc.2"
-twilio = "1.0.0"
+twilio-agnostic = "1.0.0"
